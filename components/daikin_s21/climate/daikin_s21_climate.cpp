@@ -358,6 +358,14 @@ void DaikinS21Climate::update() {
         ESP_LOGI(TAG, "S21 setpoint updated to %.1f",
                  this->expected_s21_setpoint);
       }
+    } else {
+      // When we're not in setpoint check mode (i.e. OFF and the device has been rebooted) it would
+      // still be nice for the climate control to report a setpoint that's not 0.
+      // If the stored value is looks uninitialized, then set the target temperature to the current S21
+      // setpoint so Home Assistant will have a value to display.
+      if (this->target_temperature == 0.0) {
+        this->target_temperature = this->s21->get_setpoint();
+      }
     }
 
     this->publish_state();
